@@ -1,10 +1,13 @@
 # Local .terraform directories
-*/DB/*
-*/win32/*
+**/DB/*
+*win32/*
+*__history/*
 
 # .tfstate files
 #*.tfstate
 #*.tfstate.*
+
+*WorkTime.rsm*
 
 # Crash log files
 crash.log

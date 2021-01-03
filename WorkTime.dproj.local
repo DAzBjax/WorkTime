@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899.12.30 00:00:00.000.814,R:\Work.Projects\Delphi\WorkTime\MainForm_unit.dfm=C:\Users\DAzBj_000\Documents\RAD Studio\Projects\Unit3.dfm</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.909,C:\Users\DAzBj_000\Documents\RAD Studio\Projects\Project3.dproj=C:\Users\DAzBj_000\Documents\RAD Studio\Projects\Project3.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.814,R:\Work.Projects\Delphi\WorkTime\MainForm_unit.pas=C:\Users\DAzBj_000\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.990,R:\Work.Projects\Delphi\WorkTime\WorkTime.dproj=C:\Users\DAzBj_000\Documents\RAD Studio\Projects\Project3.dproj</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.484,=C:\Users\DAzBj_000\Documents\RAD Studio\Projects\Unit3.pas</Transaction>
+    <Transaction>2021.01.01 08:57:43.148,=R:\Work.Projects\Delphi\WorkTime\Unit1.pas</Transaction>
+    <Transaction>2021.01.01 09:11:30.521,=R:\Work.Projects\Delphi\WorkTime\Unit2.pas</Transaction>
+    <Transaction>2021.01.01 09:11:43.259,R:\Work.Projects\Delphi\WorkTime\DataModule.dfm=R:\Work.Projects\Delphi\WorkTime\Unit2.dfm</Transaction>
+    <Transaction>2021.01.01 09:11:43.259,R:\Work.Projects\Delphi\WorkTime\DataModule.pas=R:\Work.Projects\Delphi\WorkTime\Unit2.pas</Transaction>
+    <Transaction>2021.01.01 09:12:39.608,R:\Work.Projects\Delphi\WorkTime\AddFilterForm_unit.pas=R:\Work.Projects\Delphi\WorkTime\Unit1.pas</Transaction>
+    <Transaction>2021.01.01 09:12:39.608,R:\Work.Projects\Delphi\WorkTime\AddFilterForm_unit.dfm=R:\Work.Projects\Delphi\WorkTime\Unit1.dfm</Transaction>
+  </Transactions>
+</BorlandProject>

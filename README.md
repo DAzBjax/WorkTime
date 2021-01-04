@@ -1,5 +1,5 @@
 # WorkTime
- - PRIVACY -> All your data tracks in \DB\ folder, remove it if you needed
+PRIVACY -> All your data tracks in \DB\ folder, remove it if you needed
  - !!! Does not hide your data, do not use it in public locations, or add data hiding/crypto.
 
 1. Must be started with admin rights, win32 DOES NOT WORKS in amd64 platfroms, Use win64 in AMD64 platforms.

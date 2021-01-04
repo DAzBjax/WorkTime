@@ -14,8 +14,8 @@ PRIVACY -> All your data tracks in \DB\ folder, remove it if you needed
 
 
 7. ExeName.txt is multiline filter file, where each line is:
-     - '\*' + 'LINE TEXT FROM FILE' + '\*', for filtering forms feaders. '\*' as first and last character will add automaticaly. File does not contains it '\*', but you can add it if you needed
-     - *an empty file meaning just '\*' filter*
+     - '\*' + 'LINE TEXT FROM FILE' + '\*', for filtering forms feaders. '\*' as first and last character will add automaticaly. File does not contains it '\*', but you can add itin your filter if needed
+     - **an empty file meaning just '\*' filter** for **ExeName.exe**
      - new lines can be added by double clicking an line in ListView, edit mask and save.
 
 

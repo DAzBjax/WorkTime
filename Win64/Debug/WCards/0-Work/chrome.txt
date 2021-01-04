@@ -9,3 +9,4 @@ Microsoft Docs - Google Chrome
 RAD Studio API Documentation - Google Chrome
 Stack Overflow - Google Chrome
 GitHub* - Google Chrome
+https://partner.steampowered.com/* - Google Chrome

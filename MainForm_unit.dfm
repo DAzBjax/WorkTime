@@ -15,6 +15,9 @@ object MainForm: TMainForm
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  DesignSize = (
+    1101
+    586)
   PixelsPerInch = 96
   TextHeight = 13
   object PageControl1: TPageControl
@@ -220,10 +223,6 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'Month'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 682
       object Chart_4WeeksData: TChart
         Left = 0
         Top = 0
@@ -268,10 +267,6 @@ object MainForm: TMainForm
         Align = alClient
         TabOrder = 0
         OnMouseMove = Chart_4WeeksDataMouseMove
-        ExplicitLeft = 8
-        ExplicitTop = -15
-        ExplicitWidth = 978
-        ExplicitHeight = 697
         ColorPaletteIndex = 5
         object Series4: TLineSeries
           Marks.Arrow.Visible = True
@@ -352,10 +347,11 @@ object MainForm: TMainForm
     end
   end
   object Button_RestartThisApplication: TButton
-    Left = 915
+    Left = 1002
     Top = 549
     Width = 75
     Height = 25
+    Anchors = [akRight, akBottom]
     Caption = 'Button_RestartThisApplication'
     TabOrder = 1
     OnClick = Button_RestartThisApplicationClick

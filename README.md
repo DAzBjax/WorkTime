@@ -10,8 +10,8 @@ X - is an integer for sorting categories,
 ExeName - is 'exe name' for filter, .txt - is editable by notepad
 
 ExeName.txt is multyline filter file, where each line is:
-'*' + 'LINE TEXT FROM FILE' + '*', for filtering forms feaders. '*' as first and last character will add automaticaly.
-an empty file meaning just '*' filter
+'\*' + 'LINE TEXT FROM FILE' + '\*', for filtering forms feaders. '\*' as first and last character will add automaticaly.
+an empty file meaning just '\*' filter
 New lines can be added by double clicking an line in ListView.
 
 

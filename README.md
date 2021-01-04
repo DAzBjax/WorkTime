@@ -1,4 +1,4 @@
-# WorkTime
+# WorkTime Delphi XE4
 PRIVACY -> All your data tracks in \DB\ folder, remove it if you needed
  - !!! Does not hide your data, do not use it in public locations, or add data hiding/crypto.
 

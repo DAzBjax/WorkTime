@@ -3,7 +3,7 @@ PRIVACY -> All your data tracks in \DB\ folder, remove it if you needed
  - !!! Does not hide your data, do not use it in public locations, or add data hiding/crypto.
 
 
-1. Must be started with admin rights, win32 DOES NOT WORKS in amd64 platfroms, Use win64 in AMD64 platforms.
+1. Must be started with admin rights, win32 DOES NOT WORKS in amd64 platfroms, Use win64 for amd64 platforms.
 2. Admins manifest already applyed for project, for DEBUG -> starts delphi with admins rights.
 3. Automatically restarts when new day reached, have Mutex for preventing starts of 2 more instances.
 4. Filters in **\WCards\X-Category\ExeName.txt**, where:

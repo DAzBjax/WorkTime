@@ -12,9 +12,9 @@ ExeName - is 'exe name' for filter, .txt - is editable by notepad
 
 
 ExeName.txt is multiline filter file, where each line is:
- - '\*' + 'LINE TEXT FROM FILE' + '\*', for filtering forms feaders. '\*' as first and last character will add automaticaly.
+ - '\*' + 'LINE TEXT FROM FILE' + '\*', for filtering forms feaders. '\*' as first and last character will add automaticaly. File does not contains it '\*', but you can add it if you needed
  - an empty file meaning just '\*' filter
- - w lines can be added by double clicking an line in ListView.
+ - new lines can be added by double clicking an line in ListView, edit mask and save.
 
 
 How it works : 

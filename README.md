@@ -12,12 +12,12 @@ ExeName - is 'exe name' for filter, .txt - is editable by notepad
 
 
 ExeName.txt is multyline filter file, where each line is:
-'\*' + 'LINE TEXT FROM FILE' + '\*', for filtering forms feaders. '\*' as first and last character will add automaticaly.
-an empty file meaning just '\*' filter
-New lines can be added by double clicking an line in ListView.
+ - '\*' + 'LINE TEXT FROM FILE' + '\*', for filtering forms feaders. '\*' as first and last character will add automaticaly.
+ - an empty file meaning just '\*' filter
+ - w lines can be added by double clicking an line in ListView.
 
 
 How it works : 
-Every 1000ms -> Track 'active form header' and it '.exe' -> filter this data by \WCards\X-Category\ExeName.txt -> Add into filtered 'Category'
-Saves data every 10s or OnApplicationExit only for changed processes.
-Re-Filters TODAY data only OnApplicationRestart
+ 1. Every 1000ms -> Track 'active form header' and it '.exe' -> filter this data by \WCards\X-Category\ExeName.txt -> Add into filtered 'Category'
+ 2. Saves data every 10s or OnApplicationExit only for changed processes.
+ 3 .Re-Filters TODAY data only OnApplicationRestart

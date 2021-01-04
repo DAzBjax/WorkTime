@@ -10,7 +10,7 @@ PRIVACY -> All your data tracks in \DB\ folder, remove it if you needed
     - X - is an integer for sorting categories, 
     - ExeName - is 'exe name' for filter, .txt - is editable by notepad
 5. **X-Category\Color** is 'one line text file' with R.G.B color data (in bytes 0-255) for charts 255.0.0 -> clRed
-6. **X-Category\Default** is an empty file for category that will be DEFAULT for all UNMATCHED processes. 
+6. **X-Category\Default** is an empty file for category that will be DEFAULT for all UNMATCHED processes or forms headers. 
 
 
 7. ExeName.txt is multiline filter file, where each line is:

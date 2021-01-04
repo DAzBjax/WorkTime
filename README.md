@@ -22,4 +22,4 @@ PRIVACY -> All your data tracks in \DB\ folder, remove it if you needed
 How it works : 
  1. Every 1000ms -> Track 'active form header' and it '.exe' -> filter this data by \WCards\X-Category\ExeName.txt -> Add into filtered 'Category'
  2. Saves data every 10s or OnApplicationExit only for changed processes.
- 3 .Re-Filters TODAY data only OnApplicationRestart
+ 3. Re-Filters TODAY data only OnApplicationRestart.

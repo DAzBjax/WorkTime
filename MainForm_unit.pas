@@ -38,6 +38,7 @@ type
     TabSheet1: TTabSheet;
     TabSheet2: TTabSheet;
     Button_RestartThisApplication: TButton;
+    CheckBox_EnableAlwaysMarks: TCheckBox;
     procedure OneSecTimerTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -287,6 +288,10 @@ begin
   if (settings.Count > 0) then
   begin
     MainForm.SpinEdit_UserAwayLimitInM.Text := settings[0];
+    try
+      MainForm.CheckBox_EnableAlwaysMarks.Checked := (settings[1] = '10');
+    except
+    end;
   end;
 end;
 
@@ -296,6 +301,7 @@ var
 begin
   settings := TStringList.Create;
   settings.Add(MainForm.SpinEdit_UserAwayLimitInM.Text);
+  if (MainForm.CheckBox_EnableAlwaysMarks.Checked) then settings.Add('10') else settings.Add('01');
   settings.SaveToFile(g_exePath + '\settings.txt');
   settings.Free;
 end;
@@ -305,9 +311,11 @@ var
 
 procedure TMainForm.Button_RestartThisApplicationClick(Sender: TObject);
 begin
+    //SaveSettings;
    // ShellAPI
    ShellExecute(Handle, nil, PChar(Application.ExeName), nil, nil, SW_SHOWNOACTIVATE);
-   Application.Terminate; // or, if this is the main form, simply Close;
+   MainForm.Close;
+   //Application.Terminate; // or, if this is the main form, simply Close;
 end;
 
 procedure TMainForm.Button2Click(Sender: TObject);
@@ -327,6 +335,8 @@ var
   markIndex: Integer;
 
   isHaveSummary: boolean;
+
+  sMarks : TMarksItem;
 begin
 
   Chart_4WeeksData.SeriesList.Clear;
@@ -341,6 +351,16 @@ begin
     // rocedure TMainForm.AddBarChart_IntoTodayChart(categoryName : string; wildcardsBaseDir: string; I: Integer);
 
     lineSeries := TLineSeries.Create(Chart_4WeeksData);
+
+    if (category.monthlyChartAlwaysVisibleMarks) then
+    begin
+      lineSeries.Tag := 10;
+    end
+    else
+    begin
+      lineSeries.Tag := 0;
+    end;
+
     lineSeries.ParentChart := Chart_4WeeksData;
     lineSeries.LegendTitle := category.name;
     lineSeries.LinePen.Width := 1;
@@ -355,6 +375,7 @@ begin
     l_tmpFilter := TTodayFilter.Create();
     l_tmpFilter.name := category.name;
     l_tmpFilter.value := 0;
+    l_tmpFilter.monthlyChartAlwaysVisibleMarks := category.monthlyChartAlwaysVisibleMarks;
     l_TodayFilters.Add(FilterKeyIndex, l_tmpFilter);
 
   end;
@@ -398,11 +419,11 @@ begin
         markIndex := Chart_4WeeksData.Series[filterKeyCounter].AddXY(-I, l_TodayFilters[FilterKeyIndex].value,
           FormatDateTime('DD/MM/YYYY', startDate));
 
-        Chart_4WeeksData.Series[filterKeyCounter].Marks[markIndex].Text.Text :=
-          MS2S(l_TodayFilters[FilterKeyIndex].value);
-        Chart_4WeeksData.Series[filterKeyCounter].Marks[markIndex].Visible := false;
-        Chart_4WeeksData.Series[filterKeyCounter].Marks[markIndex].color :=
-          Chart_4WeeksData.Series[filterKeyCounter].color;
+        sMarks := Chart_4WeeksData.Series[filterKeyCounter].Marks[markIndex];
+
+        sMarks.Text.Text := MS2S(l_TodayFilters[FilterKeyIndex].value);
+        sMarks.Visible := l_TodayFilters[FilterKeyIndex].monthlyChartAlwaysVisibleMarks;
+        sMarks.color := Chart_4WeeksData.Series[filterKeyCounter].color;
 
         inc(filterKeyCounter);
       end;
@@ -412,6 +433,8 @@ begin
   l_TodayFilters.Free();
 
 end;
+
+var g_AlwaysVisibleMarksSeries : integer;
 
 procedure TMainForm.Chart_4WeeksDataMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
@@ -442,7 +465,8 @@ begin
       for marksI := 0 to Chart_4WeeksData.SeriesList[seriesI].Marks.Items.Count - 1 do
       begin
         // Chart_4WeeksData.Series[seriesI].Marks[marksI].color := Chart_4WeeksData.Series[seriesI].color;
-        Chart_4WeeksData.Series[seriesI].Marks[marksI].Visible := isSelectedSeries;
+        Chart_4WeeksData.Series[seriesI].Marks[marksI].Visible := isSelectedSeries or
+                    (CheckBox_EnableAlwaysMarks.Checked and (Chart_4WeeksData.Series[seriesI].Tag = 10));
       end;
 
     end;
@@ -453,6 +477,7 @@ end;
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Timer_AutoSaveTimer(nil);
+  SaveSettings;
 end;
 
 procedure TMainForm.UpdateTodayValuesInChart(index: Integer; value: cardinal);
@@ -542,6 +567,9 @@ var
 
   filter: TTodayFilter;
 begin
+
+  PageControl1.ActivePageIndex := 0;
+
   curDayDate := Date();
 
   g_ChangedDataItems := TList<TExeData>.Create;
@@ -587,6 +615,7 @@ begin
     filter.value := 0;
     filter.name := tmpStr;
     filter.fullName := wildcardsCategories[I];
+    filter.monthlyChartAlwaysVisibleMarks := TFile.Exists(wildcardsCategories[I] + '\EnableMonthlyMarks');
 
     g_TodayFilters.Add(I, filter);
 

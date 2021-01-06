@@ -268,6 +268,14 @@ object MainForm: TMainForm
         TabOrder = 0
         OnMouseMove = Chart_4WeeksDataMouseMove
         ColorPaletteIndex = 5
+        object CheckBox_EnableAlwaysMarks: TCheckBox
+          Left = 153
+          Top = 7
+          Width = 200
+          Height = 17
+          Caption = 'Enable always wisible monthly marks'
+          TabOrder = 0
+        end
         object Series4: TLineSeries
           Marks.Arrow.Visible = True
           Marks.Callout.Brush.Color = clBlack

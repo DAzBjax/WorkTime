@@ -63,6 +63,7 @@ type TTodayFilter = class
     value : cardinal;
     name : string;
     fullName : string;
+    monthlyChartAlwaysVisibleMarks : boolean;
   end;
 
 var

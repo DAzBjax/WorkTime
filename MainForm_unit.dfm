@@ -1,7 +1,7 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'MainForm'
+  Caption = 'Work time'
   ClientHeight = 586
   ClientWidth = 1101
   Color = clBtnFace
@@ -25,7 +25,7 @@ object MainForm: TMainForm
     Top = 0
     Width = 1101
     Height = 586
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
@@ -43,18 +43,6 @@ object MainForm: TMainForm
         Visible = False
         OnClick = SaveButtonClick
       end
-      object ValueListEditor1: TValueListEditor
-        Left = 8
-        Top = 8
-        Width = 841
-        Height = 473
-        KeyOptions = [keyEdit]
-        TabOrder = 1
-        Visible = False
-        ColWidths = (
-          582
-          253)
-      end
       object GroupBox1: TGroupBox
         Left = 960
         Top = 8
@@ -62,7 +50,7 @@ object MainForm: TMainForm
         Height = 121
         Anchors = [akTop, akRight]
         Caption = 'User away settings'
-        TabOrder = 2
+        TabOrder = 1
         object Label1: TLabel
           Left = 14
           Top = 25
@@ -96,7 +84,7 @@ object MainForm: TMainForm
       object ListView1: TListView
         Left = 8
         Top = 8
-        Width = 841
+        Width = 793
         Height = 473
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <
@@ -125,7 +113,7 @@ object MainForm: TMainForm
         ParentDoubleBuffered = False
         SmallImages = g_DataModule.ListViewIcons
         SortType = stText
-        TabOrder = 3
+        TabOrder = 2
         ViewStyle = vsReport
         OnColumnClick = ListView1ColumnClick
         OnCompare = ListView1Compare
@@ -137,7 +125,7 @@ object MainForm: TMainForm
         Width = 609
         Height = 21
         Anchors = [akLeft, akRight, akBottom]
-        TabOrder = 4
+        TabOrder = 3
         Text = 'Edit_ActiveProcessName'
       end
       object Edit_ActiveProcessFormName: TEdit
@@ -146,13 +134,13 @@ object MainForm: TMainForm
         Width = 609
         Height = 21
         Anchors = [akLeft, akRight, akBottom]
-        TabOrder = 5
+        TabOrder = 4
         Text = 'Edit_ActiveProcessFormName'
       end
       object Chart_Today: TChart
-        Left = 855
+        Left = 807
         Top = 159
-        Width = 234
+        Width = 282
         Height = 346
         Legend.Visible = False
         Title.Text.Strings = (
@@ -162,7 +150,7 @@ object MainForm: TMainForm
         LeftAxis.Visible = False
         View3D = False
         Zoom.Allow = False
-        TabOrder = 6
+        TabOrder = 5
         Anchors = [akTop, akRight, akBottom]
         PrintMargins = (
           33
@@ -273,7 +261,7 @@ object MainForm: TMainForm
           Top = 7
           Width = 200
           Height = 17
-          Caption = 'Enable always wisible monthly marks'
+          Caption = 'Enable always visible monthly marks'
           TabOrder = 0
         end
         object Series4: TLineSeries

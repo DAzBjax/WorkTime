@@ -13,7 +13,6 @@ uses
 type
   TMainForm = class(TForm)
     OneSecTimer: TTimer;
-    ValueListEditor1: TValueListEditor;
     Edit_ActiveProcessName: TEdit;
     Edit_ActiveProcessFormName: TEdit;
     SaveButton: TButton;
@@ -434,11 +433,11 @@ begin
 
 end;
 
-var g_AlwaysVisibleMarksSeries : integer;
+//var g_AlwaysVisibleMarksSeries : integer;
 
 procedure TMainForm.Chart_4WeeksDataMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-  Pt: TPoint;
+//  Pt: TPoint;
   seriesI, marksI: Integer;
   P: TChartClickedPart;
   isSelectedSeries: boolean;
@@ -829,7 +828,7 @@ procedure TMainForm.OneSecTimerTimer(Sender: TObject);
 
 var
   foregroudWindow: HWND;
-  I: Integer;
+//  I: Integer;
 
   textLen: Integer;
 
@@ -839,14 +838,14 @@ var
   filename: string;
 
   listTextValue: string;
-  listIntValue: Integer;
+//  listIntValue: Integer;
   // keyValue : string; //ключ который будем искать
   // wildcardTestResult : integer;
 
   exeDataItem: TExeData;
 
   counter: cardinal;
-  Row: Integer;
+  //Row: Integer;
 
   gettickcount_cur_value: cardinal;
 
@@ -854,7 +853,7 @@ var
 
   groupIndex: Integer;
 
-  valToExit: cardinal;
+  //valToExit: cardinal;
   valPreExit: cardinal;
 
   curDate : TDate;

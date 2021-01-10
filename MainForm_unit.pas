@@ -51,12 +51,14 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure UpdateTodayValuesInChart(index: Integer; value: cardinal);
     procedure UpdateTodaySummaryValuesInChart(SummaryFiltersIndex: Integer);
+    procedure UpdateTodaySummaryValuesInMonthsChart(SummaryFiltersIndex: Integer);
     procedure Button2Click(Sender: TObject);
     procedure Chart_4WeeksDataMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure Button_RestartThisApplicationClick(Sender: TObject);
 
   private
     procedure AddBarChart_IntoTodayChart(categoryName: string; wildcardsBaseDir: string; I: Integer);
+
     { Private declarations }
   public
     { Public declarations }
@@ -317,6 +319,7 @@ begin
    //Application.Terminate; // or, if this is the main form, simply Close;
 end;
 
+var l_monthDataLoaded : boolean = false;
 procedure TMainForm.Button2Click(Sender: TObject);
 var
   startDate: TDateTime;
@@ -409,6 +412,11 @@ begin
     end;
 
     isHaveSummary := isHaveSummary or (l_TodayFilters[g_SummaryFiltersIndex].value > 0);
+    if ((i = 0) and (isHaveSummary)) then
+    begin
+      l_monthDataLoaded := true;
+    end;
+
     // update chart
     filterKeyCounter := 0;
     if (isHaveSummary) then
@@ -430,8 +438,53 @@ begin
   end;
 
   l_TodayFilters.Free();
-
 end;
+
+
+procedure TMainForm.UpdateTodaySummaryValuesInMonthsChart(SummaryFiltersIndex: Integer);
+var
+  summaryValue, value: cardinal;
+  index: Integer;
+
+  count : integer;
+
+  FilterKeyIndex : integer;
+begin
+  if (not l_monthDataLoaded) then exit;
+
+  summaryValue := 0;
+  for index in g_TodayFilters.Keys do
+  begin
+    if (index <> SummaryFiltersIndex) then
+    begin
+      summaryValue := summaryValue + g_TodayFilters[index].value;
+    end;
+  end;
+
+  index := 0;
+  for FilterKeyIndex in g_TodayFilters.Keys do
+  begin
+      if (FilterKeyIndex = SummaryFiltersIndex) then
+      begin
+        value := summaryValue;
+      end
+      else
+      begin
+        value :=  g_TodayFilters[FilterKeyIndex].value;
+      end;
+
+      count := Chart_4WeeksData.Series[index].YValues.Count-1;
+      Chart_4WeeksData.Series[index].YValue[count] := value;
+      Chart_4WeeksData.Series[index].Marks[Count].Text.Text := MS2S(value);
+
+      inc(index);
+  end;
+
+  //count := Chart_4WeeksData.Series[SummaryFiltersIndex].YValues.Count-1;
+  //Chart_4WeeksData.Series[SummaryFiltersIndex].YValue[count] := value;
+  //Chart_4WeeksData.Series[SummaryFiltersIndex].Marks[Count].Text.Text := MS2S(value);
+end;
+
 
 //var g_AlwaysVisibleMarksSeries : integer;
 
@@ -959,6 +1012,7 @@ begin
 
   UpdateTodayValuesInChart(listViewItem.GroupID, g_TodayFilters[listViewItem.GroupID].value - valPreExit + counter);
   UpdateTodaySummaryValuesInChart(g_SummaryFiltersIndex);
+  UpdateTodaySummaryValuesInMonthsChart(g_SummaryFiltersIndex);
 
 end;
 

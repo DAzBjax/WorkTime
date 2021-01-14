@@ -38,6 +38,10 @@ type
     TabSheet2: TTabSheet;
     Button_RestartThisApplication: TButton;
     CheckBox_EnableAlwaysMarks: TCheckBox;
+    Edit_ActiveProcessCounter: TEdit;
+    Edit_SelectedProcessName: TEdit;
+    Button_AddExternalData: TButton;
+    FileOpenDialog1: TFileOpenDialog;
     procedure OneSecTimerTimer(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -55,9 +59,12 @@ type
     procedure Button2Click(Sender: TObject);
     procedure Chart_4WeeksDataMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
     procedure Button_RestartThisApplicationClick(Sender: TObject);
+    procedure TabSheet1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure Button_AddExternalDataClick(Sender: TObject);
 
   private
     procedure AddBarChart_IntoTodayChart(categoryName: string; wildcardsBaseDir: string; I: Integer);
+    procedure SimulateActiveProcess(textStr: string; path: string; counter: cardinal; exename: string);
 
     { Private declarations }
   public
@@ -72,7 +79,7 @@ implementation
 {$R *.dfm}
 
 uses System.Generics.Collections, Winapi.PsAPI, ShellAPI, System.TimeSpan, Vcl.Clipbrd, DataModule, addfilterform_unit,
-  DateUtils, SyncObjs;
+  DateUtils, SyncObjs, System.Generics.Defaults;
 
 function MS2S(value: cardinal): string;
 begin
@@ -302,7 +309,10 @@ var
 begin
   settings := TStringList.Create;
   settings.Add(MainForm.SpinEdit_UserAwayLimitInM.Text);
-  if (MainForm.CheckBox_EnableAlwaysMarks.Checked) then settings.Add('10') else settings.Add('01');
+  if (MainForm.CheckBox_EnableAlwaysMarks.Checked) then
+    settings.Add('10')
+  else
+    settings.Add('01');
   settings.SaveToFile(g_exePath + '\settings.txt');
   settings.Free;
 end;
@@ -310,16 +320,136 @@ end;
 var
   g_ChangedDataItems: TList<TExeData>;
 
-procedure TMainForm.Button_RestartThisApplicationClick(Sender: TObject);
+procedure TMainForm.Button_AddExternalDataClick(Sender: TObject);
+var
+  DBDirectories: TStringDynArray;
+
+  dateLocation: string;
+
+  processDB: TStringList;
+  processesDBs: TStringDynArray;
+  I, limI: Integer;
+  exeData: TExeData;
+
+  todayDateStr, DBEntryDateStr: string;
+  isTodayFilter: boolean;
+
+  index, limitIndex: Integer;
+
+  LocalDBLocation, exeDBFileName, LocalDBEXEFileName: string;
 begin
-    //SaveSettings;
-   // ShellAPI
-   ShellExecute(Handle, nil, PChar(Application.ExeName), nil, nil, SW_SHOWNOACTIVATE);
-   MainForm.Close;
-   //Application.Terminate; // or, if this is the main form, simply Close;
+  // open folder dialog
+  if (not FileOpenDialog1.Execute()) then
+    exit();
+
+  // folder name is ....
+  if (ExtractFileName(FileOpenDialog1.FileName) <> 'DB') then
+    exit();
+
+  // load ex data
+  DBDirectories := TDirectory.GetDirectories(FileOpenDialog1.FileName);
+
+  // today date filter
+  todayDateStr := ConvertDateToDayPath(now());
+
+  for dateLocation in DBDirectories do // for all dates in db
+  begin
+
+    if (not TDirectory.Exists(dateLocation)) then
+    begin
+      continue;
+    end;
+
+    DBEntryDateStr := ExtractFileName(dateLocation);
+    LocalDBLocation := ConvertDateStringToPathInDBLocation(DBEntryDateStr);
+
+    isTodayFilter := CompareText(todayDateStr, DBEntryDateStr) = 0;
+
+    // not today and not have this date in local db
+    if ((not isTodayFilter) and (not TDirectory.Exists(LocalDBLocation))) then
+    begin
+      // copy full directory into local db
+      // delete this location
+      TDirectory.Copy(dateLocation, LocalDBLocation);
+      TDirectory.Delete(dateLocation, true);
+      // breaks other operations
+      continue;
+    end;
+
+    // load all txt only files with processes stored data
+    processesDBs := TDirectory.GetFiles(dateLocation, '*.txt');
+
+    // generate new list
+    processDB := TStringList.Create;
+
+    // for each loaded txt file
+    for I := 0 to High(processesDBs) do
+    begin
+      exeDBFileName := ExtractFileName(processesDBs[I]);
+
+      // not today and not existed in target date
+      LocalDBEXEFileName := LocalDBLocation + '\' + exeDBFileName;
+      if ((not isTodayFilter) and (not TFile.Exists(LocalDBEXEFileName))) then
+      begin
+        // copy this file and icon file in target folder
+        // delete this files
+        TFile.Move(processesDBs[I], LocalDBEXEFileName);
+        TFile.Move(processesDBs[I].Remove(processesDBs[I].Length - 4) + '.ico',
+          LocalDBEXEFileName.Remove(LocalDBEXEFileName.Length - 4) + '.ico');
+
+        //continue;
+      end
+      else
+      begin
+
+        processDB.LoadFromFile(processesDBs[I]); // load it txt into lines list
+
+        // if it today -> add into today data
+        if (isTodayFilter) then
+        begin
+          index := 1;
+          limitIndex := ((processDB.Count - 1) div 2) - 1;
+          for limI := 0 to limitIndex do
+          begin
+            // simulate each process
+            SimulateActiveProcess(processDB[index], // form header
+              processesDBs[I].Remove((processesDBs[I].Length - 4)), // remove .txt for exe location
+              strtoint(processDB[index + 1]), // counter
+              processDB[0]); // exe name
+            index := index + 2;
+          end;
+
+        end
+        else
+        begin
+          processDB.Delete(0);
+          TFile.AppendAllText(LocalDBEXEFileName, processDB.Text);
+          // TFile.Delete(processesDBs[i]);
+        end;
+      end;
+    end;
+    processDB.Free; // clear list
+
+    TDirectory.Delete(dateLocation, true); //delete data folder
+
+  end;
+
+  // if it last days / add or copy last days data into local storage
+  // delete ex data
 end;
 
-var l_monthDataLoaded : boolean = false;
+procedure TMainForm.Button_RestartThisApplicationClick(Sender: TObject);
+begin
+  // SaveSettings;
+  // ShellAPI
+  ShellExecute(Handle, nil, PChar(Application.exename), nil, nil, SW_SHOWNOACTIVATE);
+  MainForm.Close;
+  // Application.Terminate; // or, if this is the main form, simply Close;
+end;
+
+var
+  l_monthDataLoaded: boolean = false;
+
 procedure TMainForm.Button2Click(Sender: TObject);
 var
   startDate: TDateTime;
@@ -338,7 +468,7 @@ var
 
   isHaveSummary: boolean;
 
-  sMarks : TMarksItem;
+  sMarks: TMarksItem;
 begin
 
   Chart_4WeeksData.SeriesList.Clear;
@@ -412,7 +542,7 @@ begin
     end;
 
     isHaveSummary := isHaveSummary or (l_TodayFilters[g_SummaryFiltersIndex].value > 0);
-    if ((i = 0) and (isHaveSummary)) then
+    if ((I = 0) and (isHaveSummary)) then
     begin
       l_monthDataLoaded := true;
     end;
@@ -440,17 +570,17 @@ begin
   l_TodayFilters.Free();
 end;
 
-
 procedure TMainForm.UpdateTodaySummaryValuesInMonthsChart(SummaryFiltersIndex: Integer);
 var
   summaryValue, value: cardinal;
   index: Integer;
 
-  count : integer;
+  Count: Integer;
 
-  FilterKeyIndex : integer;
+  FilterKeyIndex: Integer;
 begin
-  if (not l_monthDataLoaded) then exit;
+  if (not l_monthDataLoaded) then
+    exit;
 
   summaryValue := 0;
   for index in g_TodayFilters.Keys do
@@ -464,33 +594,33 @@ begin
   index := 0;
   for FilterKeyIndex in g_TodayFilters.Keys do
   begin
-      if (FilterKeyIndex = SummaryFiltersIndex) then
-      begin
-        value := summaryValue;
-      end
-      else
-      begin
-        value :=  g_TodayFilters[FilterKeyIndex].value;
-      end;
+    if (FilterKeyIndex = SummaryFiltersIndex) then
+    begin
+      value := summaryValue;
+    end
+    else
+    begin
+      value := g_TodayFilters[FilterKeyIndex].value;
+    end;
 
-      count := Chart_4WeeksData.Series[index].YValues.Count-1;
-      Chart_4WeeksData.Series[index].YValue[count] := value;
-      Chart_4WeeksData.Series[index].Marks[Count].Text.Text := MS2S(value);
+    Count := Chart_4WeeksData.Series[index].YValues.Count - 1;
+    Chart_4WeeksData.Series[index].YValue[Count] := value;
+    Chart_4WeeksData.Series[index].Marks[Count].Text.Text := MS2S(value);
 
-      inc(index);
+    inc(index);
   end;
 
-  //count := Chart_4WeeksData.Series[SummaryFiltersIndex].YValues.Count-1;
-  //Chart_4WeeksData.Series[SummaryFiltersIndex].YValue[count] := value;
-  //Chart_4WeeksData.Series[SummaryFiltersIndex].Marks[Count].Text.Text := MS2S(value);
+  // count := Chart_4WeeksData.Series[SummaryFiltersIndex].YValues.Count-1;
+  // Chart_4WeeksData.Series[SummaryFiltersIndex].YValue[count] := value;
+  // Chart_4WeeksData.Series[SummaryFiltersIndex].Marks[Count].Text.Text := MS2S(value);
 end;
 
 
-//var g_AlwaysVisibleMarksSeries : integer;
+// var g_AlwaysVisibleMarksSeries : integer;
 
 procedure TMainForm.Chart_4WeeksDataMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer);
 var
-//  Pt: TPoint;
+  // Pt: TPoint;
   seriesI, marksI: Integer;
   P: TChartClickedPart;
   isSelectedSeries: boolean;
@@ -518,7 +648,7 @@ begin
       begin
         // Chart_4WeeksData.Series[seriesI].Marks[marksI].color := Chart_4WeeksData.Series[seriesI].color;
         Chart_4WeeksData.Series[seriesI].Marks[marksI].Visible := isSelectedSeries or
-                    (CheckBox_EnableAlwaysMarks.Checked and (Chart_4WeeksData.Series[seriesI].Tag = 10));
+          (CheckBox_EnableAlwaysMarks.Checked and (Chart_4WeeksData.Series[seriesI].Tag = 10));
       end;
 
     end;
@@ -560,14 +690,14 @@ begin
     MS2S(value);
 end;
 
-function ReadColorFromFile(filename: string; baseColor: TColor): TColor;
+function ReadColorFromFile(FileName: string; baseColor: TColor): TColor;
 var
   colorFileData: string;
   colorData: TArray<string>;
 begin
-  if (TFile.Exists(filename)) then
+  if (TFile.Exists(FileName)) then
   begin
-    colorFileData := TFile.ReadAllText(filename);
+    colorFileData := TFile.ReadAllText(FileName);
     colorData := colorFileData.Split(['.']);
     try
       result := RGB(strtoint(colorData[0]), strtoint(colorData[1]), strtoint(colorData[2]));
@@ -599,8 +729,85 @@ begin
   Chart_Today.Series[I].AddXY(0, 0, '');
 end;
 
+procedure TMainForm.SimulateActiveProcess(textStr: string; path: string; counter: cardinal; exename: string);
+var
+  groupIndex: Integer;
+  valPreExit: cardinal;
+  listViewItem: TListItem;
+  listTextValue: string;
+  exeDataItem: TExeData;
+begin
+  exename := exename.ToLower;
+  // counter := 1;
+  listTextValue := exename + ' - ' + textStr;
+  if (g_Dictionary.ContainsKey(exename)) then
+  begin
+    exeDataItem := g_Dictionary[exename];
+  end
+  else
+  // если такой ключ уже есть, то иконку извлекать не надо
+  // не такого ключа
+  begin
+    exeDataItem := TExeData.Create;
+    // извлекаем иконку и сохран€ем куда следует
+    exeDataItem.Init(exename, path);
+    g_Dictionary.Add(exename, exeDataItem);
+  end;
 
-var curDayDate : TDate;
+  valPreExit := exeDataItem.GetCounter(textStr);
+  // valToExit := counter;
+  counter := exeDataItem.AddCounter(textStr, counter);
+  // valToExit := counter - valToExit; //difference
+  if (not g_ChangedDataItems.Contains(exeDataItem)) then
+  begin
+    g_ChangedDataItems.Add(exeDataItem);
+  end;
+  if (g_ListViewRoots.ContainsKey(listTextValue)) then
+  begin
+    listViewItem := g_ListViewRoots[listTextValue];
+    listViewItem.SubItems[1] := MS2S(counter);
+  end
+  else
+  begin
+    listViewItem := ListView1.Items.Add;
+    // add list view item
+    exeDataItem.l_IconIndex := g_DataModule.ListViewIcons.AddIcon(exeDataItem.Icon);
+    // store icon ondex from icons list
+    listViewItem.ImageIndex := exeDataItem.l_IconIndex;
+    // set list view item icon
+    // listViewItem.SubItems.Add('');
+    listViewItem.SubItems.Add(listTextValue);
+    listViewItem.SubItems.Add(MS2S(counter));
+    groupIndex := IsMatchesWildcards(exename, textStr);
+    if (groupIndex >= 0) then
+    begin
+      listViewItem.GroupID := groupIndex;
+    end
+    else
+    begin
+      listViewItem.GroupID := g_defaultGroupIndex;
+    end;
+    g_ListViewRoots.Add(listTextValue, listViewItem);
+  end;
+  if ((ListView1.Selected <> nil) and (Length(ListView1.Selected.SubItems[0]) > 4)) then
+  begin
+    Edit_SelectedProcessName.Visible := true;
+    exename := ListView1.Selected.SubItems[0].Substring(0, ListView1.Selected.SubItems[0].IndexOf('-') - 1);
+    Edit_SelectedProcessName.Text := exename;
+    Edit_ActiveProcessCounter.Text := MS2S(g_Dictionary[exename].GetCounter);
+  end
+  else
+  begin
+    Edit_SelectedProcessName.Visible := false;
+    Edit_ActiveProcessCounter.Text := MS2S(g_Dictionary[exename].GetCounter);
+  end;
+  UpdateTodayValuesInChart(listViewItem.GroupID, g_TodayFilters[listViewItem.GroupID].value - valPreExit + counter);
+  UpdateTodaySummaryValuesInChart(g_SummaryFiltersIndex);
+  UpdateTodaySummaryValuesInMonthsChart(g_SummaryFiltersIndex);
+end;
+
+var
+  curDayDate: TDate;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 var
@@ -628,7 +835,8 @@ begin
   // if (ListViewRoots <> nil) then ListViewRoots.Free;
   g_ListViewRoots := TDictionary<string, TListItem>.Create;
 
-  g_Dictionary := TDictionary<string, TExeData>.Create();
+  g_Dictionary := TDictionary<string, TExeData>.Create(TIStringComparer.Ordinal);
+
   g_TodayFilters := TDictionary<Integer, TTodayFilter>.Create();
   g_textChars_hash := System.SysUtils.StrAlloc(1024);
 
@@ -727,8 +935,7 @@ begin
   LoadDictionaryDataToday();
   // UpdateValueListEditor(ValueListEditor1);
   UpdateListViewEditor(ListView1, g_DataModule.ListViewIcons);
-  end;
-
+end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
@@ -757,9 +964,9 @@ procedure TMainForm.ListView1Compare(Sender: TObject; Item1, Item2: TListItem; D
 begin
   begin
     if SortedColumn = 0 then
-      Compare := Comparetext(Item1.Caption, Item2.Caption)
+      Compare := CompareText(Item1.Caption, Item2.Caption)
     else if SortedColumn <> 0 then
-      Compare := Comparetext(Item1.SubItems[SortedColumn - 1], Item2.SubItems[SortedColumn - 1]);
+      Compare := CompareText(Item1.SubItems[SortedColumn - 1], Item2.SubItems[SortedColumn - 1]);
     if Descending then
       Compare := -Compare;
   end;
@@ -807,6 +1014,11 @@ begin
     g_cursorSmalMovement_Limit_InSecs := 60 * strtoint(SpinEdit_UserAwayLimitInM.Text);
   except
   end;
+end;
+
+procedure TMainForm.TabSheet1MouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  ListView1.Selected := nil;
 end;
 
 procedure TMainForm.Timer_AutoSaveTimer(Sender: TObject);
@@ -881,42 +1093,28 @@ procedure TMainForm.OneSecTimerTimer(Sender: TObject);
 
 var
   foregroudWindow: HWND;
-//  I: Integer;
+  // I: Integer;
 
   textLen: Integer;
 
   textStr: string;
   path: string;
 
-  filename: string;
-
-  listTextValue: string;
-//  listIntValue: Integer;
-  // keyValue : string; //ключ который будем искать
-  // wildcardTestResult : integer;
-
-  exeDataItem: TExeData;
+  FileName: string;
 
   counter: cardinal;
-  //Row: Integer;
+  // Row: Integer;
 
   gettickcount_cur_value: cardinal;
 
-  listViewItem: TListItem;
-
-  groupIndex: Integer;
-
-  //valToExit: cardinal;
-  valPreExit: cardinal;
-
-  curDate : TDate;
+  curDate: TDate;
 begin
 
   curDate := Date();
-  if (curDayDate <> date) then
+  if (curDayDate <> Date) then
   begin
-      Button_RestartThisApplicationClick(nil);
-      exit;
+    Button_RestartThisApplicationClick(nil);
+    exit;
   end;
 
   foregroudWindow := GetForegroundWindow();
@@ -949,70 +1147,14 @@ begin
   end;
 
   // edit1.Text := path;
-  filename := ExtractFileName(path);
-  Edit_ActiveProcessName.Text := filename;
+  FileName := ExtractFileName(path);
+  Edit_ActiveProcessName.Text := FileName;
 
   textLen := GetWindowText(foregroudWindow, g_textChars_hash, 1024);
   textStr := string(ansistring(g_textChars_hash)).Replace('?', '', [rfReplaceAll]);
   Edit_ActiveProcessFormName.Text := textStr;
 
-  // counter := 1;
-  listTextValue := filename + ' - ' + textStr;
-  if (g_Dictionary.ContainsKey(filename)) then
-  begin
-    exeDataItem := g_Dictionary[filename];
-    // если такой ключ уже есть, то иконку извлекать не надо
-  end
-  else // не такого ключа
-  begin
-    exeDataItem := TExeData.Create;
-    // извлекаем иконку и сохран€ем куда следует
-    exeDataItem.Init(filename, path);
-    g_Dictionary.Add(filename, exeDataItem);
-  end;
-
-  valPreExit := exeDataItem.GetCounter(textStr);
-  // valToExit := counter;
-  counter := exeDataItem.AddCounter(textStr, counter);
-  // valToExit := counter - valToExit; //difference
-
-  if (not g_ChangedDataItems.Contains(exeDataItem)) then
-  begin
-    g_ChangedDataItems.Add(exeDataItem);
-  end;
-
-  if (g_ListViewRoots.ContainsKey(listTextValue)) then
-  begin
-    listViewItem := g_ListViewRoots[listTextValue];
-    listViewItem.SubItems[1] := MS2S(counter);
-  end
-  else
-  begin
-
-    listViewItem := ListView1.Items.Add(); // add list view item
-    exeDataItem.l_IconIndex := g_DataModule.ListViewIcons.AddIcon(exeDataItem.Icon); // store icon ondex from icons list
-    listViewItem.ImageIndex := exeDataItem.l_IconIndex; // set list view item icon
-
-    // listViewItem.SubItems.Add('');
-    listViewItem.SubItems.Add(listTextValue);
-    listViewItem.SubItems.Add(MS2S(counter));
-
-    groupIndex := IsMatchesWildcards(filename, textStr);
-    if (groupIndex >= 0) then
-    begin
-      listViewItem.GroupID := groupIndex;
-    end
-    else
-    begin
-      listViewItem.GroupID := g_defaultGroupIndex;
-    end;
-
-    g_ListViewRoots.Add(listTextValue, listViewItem);
-  end;
-
-  UpdateTodayValuesInChart(listViewItem.GroupID, g_TodayFilters[listViewItem.GroupID].value - valPreExit + counter);
-  UpdateTodaySummaryValuesInChart(g_SummaryFiltersIndex);
-  UpdateTodaySummaryValuesInMonthsChart(g_SummaryFiltersIndex);
+  SimulateActiveProcess(textStr, path, counter, FileName);
 
 end;
 

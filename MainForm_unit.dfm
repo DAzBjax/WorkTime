@@ -25,11 +25,12 @@ object MainForm: TMainForm
     Top = 0
     Width = 1101
     Height = 586
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     Align = alClient
     TabOrder = 0
     object TabSheet1: TTabSheet
       Caption = 'Day'
+      OnMouseDown = TabSheet1MouseDown
       DesignSize = (
         1093
         558)
@@ -84,7 +85,7 @@ object MainForm: TMainForm
       object ListView1: TListView
         Left = 8
         Top = 8
-        Width = 793
+        Width = 817
         Height = 473
         Anchors = [akLeft, akTop, akRight, akBottom]
         Columns = <
@@ -138,9 +139,9 @@ object MainForm: TMainForm
         Text = 'Edit_ActiveProcessFormName'
       end
       object Chart_Today: TChart
-        Left = 807
+        Left = 831
         Top = 159
-        Width = 282
+        Width = 258
         Height = 346
         Legend.Visible = False
         Title.Text.Strings = (
@@ -206,6 +207,31 @@ object MainForm: TMainForm
           YValues.Order = loNone
           Data = {00010000000000000000006240}
         end
+      end
+      object Edit_ActiveProcessCounter: TEdit
+        Left = 767
+        Top = 523
+        Width = 121
+        Height = 21
+        TabOrder = 6
+        Text = 'Edit_ActiveProcessCounter'
+      end
+      object Edit_SelectedProcessName: TEdit
+        Left = 640
+        Top = 523
+        Width = 121
+        Height = 21
+        TabOrder = 7
+        Text = 'Edit_SelectedProcessName'
+      end
+      object Button_AddExternalData: TButton
+        Left = 912
+        Top = 525
+        Width = 80
+        Height = 25
+        Caption = 'Add external'
+        TabOrder = 8
+        OnClick = Button_AddExternalDataClick
       end
     end
     object TabSheet2: TTabSheet
@@ -367,5 +393,16 @@ object MainForm: TMainForm
     OnTimer = Timer_AutoSaveTimer
     Left = 936
     Top = 64
+  end
+  object FileOpenDialog1: TFileOpenDialog
+    FavoriteLinks = <>
+    FileTypes = <
+      item
+        DisplayName = 'Data storage'
+        FileMask = 'DB'
+      end>
+    Options = [fdoPickFolders, fdoPathMustExist, fdoDontAddToRecent, fdoForceShowHidden]
+    Left = 884
+    Top = 536
   end
 end

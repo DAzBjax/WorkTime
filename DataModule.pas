@@ -25,7 +25,8 @@ type
     exeStringsWCounters: TDictionary<string, cardinal>;
     procedure Init(fileName: string; path: string);
     function AddCounter(textStr: string; value: cardinal): Integer;
-    function GetCounter(textStr: string): cardinal;
+    function GetCounter(textStr: string): cardinal; overload;
+    function GetCounter(): cardinal; overload;
     function LoadFromFile(processDB: TStringList; basePath: string):boolean;
     function SaveToFile(basePath: string): boolean;
   end;
@@ -77,7 +78,9 @@ var
   g_todayPath: string;
 
 function GetCategoryColor(item: string): TColor;
+function ConvertDateToDayPath(date : TDateTime):string;
 function ConvertDateToDayPathInDBLocation(date : TDateTime):string;
+function ConvertDateStringToPathInDBLocation( dateString : string ):string;
 
 implementation
 
@@ -87,9 +90,19 @@ implementation
 
 uses  Winapi.PsAPI, ShellAPI, Winapi.Windows, System.IOUtils;
 
+function ConvertDateToDayPath(date : TDateTime):string;
+begin
+   result := FormatDateTime('yyyy-mm-dd', date);;
+end;
+
 function ConvertDateToDayPathInDBLocation(date : TDateTime):string;
 begin
   result := g_dbPath + '\' + FormatDateTime('yyyy-mm-dd', date);
+end;
+
+function ConvertDateStringToPathInDBLocation( dateString : string ):string;
+begin
+  result := g_dbPath + '\' + dateString;
 end;
 
 
@@ -168,8 +181,14 @@ var
 begin
   // GetMem(pTheLargeIcons, 1 * sizeof(hIcon));
   // FillChar(pTheLargeIcons^, 1 * sizeof(hIcon), #0);
-
-  IconHandle := ExtractIcon(0, PWideChar(fileName), 0);
+  if (TFile.Exists(fileName + '.ico')) then
+  begin
+        IconHandle := ExtractIcon(0, PWideChar(fileName + '.ico'), 0);
+  end
+  else
+  begin
+    IconHandle := ExtractIcon(0, PWideChar(fileName), 0);
+  end;
   // ExtractIconEx(PWideChar(fileName), 0, IconHandle, IconSmallHandle, 1);
 
   { Flags := SHGFI_ICON or SHGFI_SYSICONINDEX or SHGFI_LARGEICON;
@@ -293,6 +312,17 @@ begin
   begin
     result := 0;
   end;
+end;
+
+function TExeData.GetCounter(): cardinal;
+var value : cardinal;
+begin
+  result := 0;
+  for value in exeStringsWCounters.Values do
+  begin // увеличиваем значение
+    result := result + value;
+  end;
+
 end;
 
 // находим нужный каунтер и добавляем в него
